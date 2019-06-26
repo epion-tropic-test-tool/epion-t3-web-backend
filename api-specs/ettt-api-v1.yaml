@@ -1,0 +1,168 @@
+openapi: 3.0.1
+info:
+  title: ETTT Manager API
+  version: 1.0.0
+servers:
+- url: https://acm.yorikop.com/api/v1
+- url: http://acm.yorikop.com/api/v1
+tags:
+- name: Project
+  description: プロジェクト
+- name: Scenario
+  description: シナリオ
+- name: User
+  description: ユーザー
+paths:
+  '/projects':
+    post:
+      summary: プロジェクト作成
+      tags:
+        - Project
+      description: |
+        テストプロジェクトを作成します。  
+        テストシナリオを実行するために、まずはプロジェクトを作成する必要があります。
+      operationId: projectCreate
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        201:
+          description: '正常'
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/Project'
+          headers:
+            'x-ettt-request-id':
+              $ref: '#/components/headers/x-ettt-request-id'
+        400:
+          description: 'リクエストのパラメータ（ヘッダ、リクエストパラメータ、ボディを含む）に許容不可な指定が存在する場合'
+          headers:
+            'x-ettt-request-id':
+              $ref: '#/components/headers/x-ettt-request-id'
+        500:
+          description: 'エラーが発生した場合（システムエラー）'
+          headers:
+            'x-ettt-request-id':
+              $ref: '#/components/headers/x-ettt-request-id'
+  '/projects/{id}':
+    get:
+      summary: プロジェクト参照
+      tags:
+      - Project
+      operationId: projectRead
+      parameters:
+        - name: id
+          in: path
+          description: プロジェクトID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 正常
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/Project'
+        404:
+          description: 指定したプロジェクトが存在しない場合
+        500:
+          description: エラーが発生した場合（システムエラー）
+    put:
+      summary: プロジェクト更新
+      tags:
+      - Project
+      operationId: projectUpdate
+      parameters:
+        - name: id
+          in: path
+          description: プロジェクトID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        204:
+          description: 正常に更新が行われた場合
+        404:
+          description: 指定したプロジェクトが存在しない場合
+        409:
+          description: 指定したプロジェクトが更新が競合した場合
+        500:
+          description: エラーが発生した場合（システムエラー）
+components:
+  requestBodies:
+    Project:
+      required: true
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: 'プロジェクト名'
+              description:
+                type: string
+                description: 'プロジェクト説明'
+            required: 
+              - name
+              - description
+  headers:
+    x-ettt-request-id:
+      description: 'リクエストを一意に特定するためのID'
+      schema:
+        type: string
+  schemas:
+#    ProjectBodyParam:
+#      type: object
+#      properties:
+#        name:
+#          type: string
+#          description: プロジェクト名
+#        description:
+#          type: string
+#          description: プロジェクト説明
+    Project:
+      title: 'プロジェクト'
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'プロジェクトID'
+        name:
+          type: string
+          description: 'プロジェクト名'
+        description:
+          type: string
+          description: 'プロジェクト説明'
+        scenarioNum:
+          type: integer
+          format: int32
+          description: 'プロジェクトの保有しているシナリオ数'
+        branchNum:
+          type: integer
+          format: int32
+          description: 'プロジェクトの保有しているブランチ数'
+        profileNum:
+          type: integer
+          format: int32
+          description: 'プロジェクトの保有しているプロファイル数'
+    ProjectOfArray:
+      title: プロジェクトリスト
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+#    Error:
+#      type: object
+#      properties:
+#        code:
+#          type: string
+#        message:
+#          type: string
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
